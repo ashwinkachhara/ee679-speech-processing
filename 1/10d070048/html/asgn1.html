@@ -1,0 +1,674 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>asgn1</title><meta name="generator" content="MATLAB 7.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-08-25"><meta name="DC.source" content="asgn1.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">%1</span>
+F1=1000;
+B1=200;
+Fs=16000;
+<span class="comment">% Evaluating the location of the poles of the filter using the frequency and</span>
+<span class="comment">% bandwidth of the filter</span>
+r=exp(-pi*B1/Fs);
+theta = 2*pi*F1/Fs;
+N = 256;
+
+Hw=zeros(N,1);
+coef1 = 2*r*cos(theta);
+coef2 = r^2;
+<span class="comment">% Calculating the transfer function of the filter using the difference</span>
+<span class="comment">% equations</span>
+<span class="keyword">for</span> j=-N/2:N/2
+    w = 2*pi*j/N;
+    compl = exp(-i*w);
+    Hw(j+N/2+1) = 1/(1-coef1*compl+coef2*compl*compl);
+<span class="keyword">end</span>
+
+x = zeros(N,1);
+x(N/2) = 1;
+y = zeros(N,1);
+<span class="comment">% To calculate the impulse response of the filter, we use the difference</span>
+<span class="comment">% equation of the filter and put an impulse x[n] as the input, So we get</span>
+<span class="comment">% output y[n] which is the impulse response</span>
+<span class="keyword">for</span> n=1:N
+    <span class="keyword">if</span>(n==1)
+        y(n) = x(n);
+    <span class="keyword">elseif</span>(n==2)
+        y(n) = coef1*y(n-1) + x(n);
+    <span class="keyword">else</span>
+        y(n) = x(n) + coef1*y(n-1) - coef2*y(n-2);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+h = y;
+figure(1);
+subplot(2,1,1);
+plot(h);
+title(<span class="string">'Impulse Response of 2-pole resonator'</span>);
+xlabel(<span class="string">'n+128'</span>);
+subplot(2,1,2);
+plot(20*log10(abs(Hw)));
+title(<span class="string">'Magnitude Response of 2-pole resonator | log scale'</span>);
+ylabel(<span class="string">'20log(|H(w)|)'</span>);
+xlabel(<span class="string">'frequency'</span>);
+
+<span class="comment">%2</span>
+<span class="comment">% Generating the impulse train</span>
+F0 = 150;
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+
+<span class="comment">% Evaluating the output using the same method of difference equations</span>
+y = zeros(8000,1);
+<span class="keyword">for</span> n=1:8000
+    <span class="keyword">if</span>(n==1)
+        y(n) = imptrain(n);
+    <span class="keyword">elseif</span>(n==2)
+        y(n) = coef1*y(n-1) + imptrain(n);
+    <span class="keyword">else</span>
+        y(n) = imptrain(n) + coef1*y(n-1) - coef2*y(n-2);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure(2);
+plot(y(1:2048));
+xlabel(<span class="string">'n'</span>);
+title(<span class="string">'Filter response to impulse train'</span>);
+
+<span class="comment">% sound(y, 16000);</span>
+
+<span class="comment">%3</span>
+<span class="comment">% All possible combinations of the given parameters of F1, B1 and F0 lead</span>
+<span class="comment">% to the signals y1, y2, y3, y4</span>
+y1 = resonator2poleimpout(300, 100, 120);
+y2 = resonator2poleimpout(1200, 200, 120);
+y3 = resonator2poleimpout(300, 100, 180);
+y4 = resonator2poleimpout(1200, 200, 180);
+
+figure(3);
+subplot(2,2,1);
+plot(y1(1:2048));
+title(<span class="string">'F1=300, B1=100, F0=120'</span>);
+xlabel(<span class="string">'n'</span>);
+subplot(2,2,2);
+plot(y2(1:2048));
+title(<span class="string">'F1=1200, B1=200, F0=120'</span>);
+xlabel(<span class="string">'n'</span>);
+subplot(2,2,3);
+plot(y3(1:2048));
+title(<span class="string">'F1=300, B1=100, F0=180'</span>);
+xlabel(<span class="string">'n'</span>);
+subplot(2,2,4);
+plot(y4(1:2048));
+title(<span class="string">'F1=1200, B1=200, F0=180'</span>);
+xlabel(<span class="string">'n'</span>);
+
+<span class="comment">% sound(y1, 16000);</span>
+<span class="comment">% sound(y2, 16000);</span>
+<span class="comment">% sound(y3, 16000);</span>
+<span class="comment">% sound(y4, 16000);</span>
+
+<span class="comment">%4</span>
+<span class="comment">%\a\</span>
+<span class="comment">% Synthesizing the sounds of vowels</span>
+[ya120 ha120] = resonator6poleout(730, 1090, 2440, 100, 120);
+[ya220 ha220] = resonator6poleout(730, 1090, 2440, 100, 220);
+<span class="comment">% sound(ya120, 16000);</span>
+<span class="comment">% sound(ya220, 16000);</span>
+figure(4);
+subplot(3,1,1);
+plot(abs(fft(ha120)));
+title(<span class="string">'magnitude response of the \a\ digital filter'</span>)
+subplot(3,1,2);
+plot(ya120(1:2048));
+title(<span class="string">'output of 120 Hz impulse train passed through \a\ filter'</span>)
+subplot(3,1,3);
+plot(ya220(1:2048));
+title(<span class="string">'output of 220 Hz impulse train passed through \a\ filter'</span>)
+
+<span class="comment">%\i\</span>
+[yi120 hi120] = resonator6poleout(270, 2290, 3010, 100, 120);
+[yi220 hi220] = resonator6poleout(270, 2290, 3010, 100, 220);
+<span class="comment">% sound(yi120, 16000);</span>
+<span class="comment">% sound(yi220, 16000);</span>
+figure(5);
+subplot(3,1,1);
+plot(abs(fft(hi120)));
+title(<span class="string">'magnitude response of the \i\ digital filter'</span>)
+subplot(3,1,2);
+plot(yi120(1:2048));
+title(<span class="string">'output of 120 Hz impulse train passed through \i\ filter'</span>)
+subplot(3,1,3);
+plot(yi220(1:2048));
+title(<span class="string">'output of 220 Hz impulse train passed through \i\ filter'</span>)
+
+<span class="comment">%\u\</span>
+[yu120 hu120] = resonator6poleout(300, 870, 2440, 100, 120);
+[yu220 hu220] = resonator6poleout(300, 870, 2440, 100, 220);
+<span class="comment">% sound(yu120, 16000);</span>
+<span class="comment">% sound(yu220, 16000);</span>
+figure(6);
+subplot(3,1,1);
+plot(abs(fft(hu120)));
+title(<span class="string">'magnitude response of the \u\ digital filter'</span>)
+subplot(3,1,2);
+plot(yu120(1:2048));
+title(<span class="string">'output of 120 Hz impulse train passed through \u\ filter'</span>)
+subplot(3,1,3);
+plot(yu220(1:2048));
+title(<span class="string">'output of 220 Hz impulse train passed through \u\ filter'</span>)
+
+<span class="comment">%5</span>
+<span class="comment">% We will analyze two signals ya120 and yi220</span>
+<span class="comment">%Twin = 10ms</span>
+Tw = 0.01;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+<span class="comment">% ya120</span>
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(7);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title(<span class="string">'Magnitude response of the signal1 without windowing | Twin=10ms'</span>)
+subplot(3,1,2);
+plot(Ya1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Ya2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+
+<span class="comment">%yi220</span>
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(8);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title(<span class="string">'Magnitude response of the signal2 without windowing | Twin=10ms'</span>)
+subplot(3,1,2);
+plot(Yi1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Yi2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+
+
+<span class="comment">%Twin = 40ms</span>
+Tw = 0.04;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+<span class="comment">% ya120</span>
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(9);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title(<span class="string">'Magnitude response of the signal1 without windowing | Twin=40ms'</span>)
+subplot(3,1,2);
+plot(Ya1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Ya2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+
+<span class="comment">%yi220</span>
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(10);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title(<span class="string">'Magnitude response of the signal2 without windowing | Twin=40ms'</span>)
+subplot(3,1,2);
+plot(Yi1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Yi2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+
+<span class="comment">%Twin = 100ms</span>
+Tw = 0.1;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+<span class="comment">% ya120</span>
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(11);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title(<span class="string">'Magnitude response of the signal1 without windowing | Twin=100ms'</span>)
+subplot(3,1,2);
+plot(Ya1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Ya2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+
+<span class="comment">%yi220</span>
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(12);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title(<span class="string">'Magnitude response of the signal2 without windowing | Twin=100ms'</span>)
+subplot(3,1,2);
+plot(Yi1);
+title(<span class="string">'Magnitude response of the rectangular windowed signal'</span>)
+subplot(3,1,3);
+plot(Yi2);
+title(<span class="string">'Magnitude response of the hamming windowed signal'</span>)
+</pre><pre class="codeoutput">Warning: Integer operands are required for colon operator when used as index 
+Warning: Unable to interpret TeX string "output of 220 Hz impulse train passed through
+\a\ filter" 
+Warning: Unable to interpret TeX string "output of 120 Hz impulse train passed through
+\a\ filter" 
+Warning: Unable to interpret TeX string "magnitude response of the \a\ digital filter" 
+Warning: Unable to interpret TeX string "output of 220 Hz impulse train passed through
+\i\ filter" 
+Warning: Unable to interpret TeX string "output of 120 Hz impulse train passed through
+\i\ filter" 
+Warning: Unable to interpret TeX string "magnitude response of the \i\ digital filter" 
+Warning: Unable to interpret TeX string "output of 220 Hz impulse train passed through
+\u\ filter" 
+Warning: Unable to interpret TeX string "output of 120 Hz impulse train passed through
+\u\ filter" 
+Warning: Unable to interpret TeX string "magnitude response of the \u\ digital filter" 
+</pre><img vspace="5" hspace="5" src="asgn1_01.png" alt=""> <img vspace="5" hspace="5" src="asgn1_02.png" alt=""> <img vspace="5" hspace="5" src="asgn1_03.png" alt=""> <img vspace="5" hspace="5" src="asgn1_04.png" alt=""> <img vspace="5" hspace="5" src="asgn1_05.png" alt=""> <img vspace="5" hspace="5" src="asgn1_06.png" alt=""> <img vspace="5" hspace="5" src="asgn1_07.png" alt=""> <img vspace="5" hspace="5" src="asgn1_08.png" alt=""> <img vspace="5" hspace="5" src="asgn1_09.png" alt=""> <img vspace="5" hspace="5" src="asgn1_10.png" alt=""> <img vspace="5" hspace="5" src="asgn1_11.png" alt=""> <img vspace="5" hspace="5" src="asgn1_12.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.12<br></p></div><!--
+##### SOURCE BEGIN #####
+%1
+F1=1000;
+B1=200;
+Fs=16000;
+% Evaluating the location of the poles of the filter using the frequency and
+% bandwidth of the filter
+r=exp(-pi*B1/Fs);
+theta = 2*pi*F1/Fs;
+N = 256;
+
+Hw=zeros(N,1);
+coef1 = 2*r*cos(theta);
+coef2 = r^2;
+% Calculating the transfer function of the filter using the difference
+% equations
+for j=-N/2:N/2
+    w = 2*pi*j/N;
+    compl = exp(-i*w);
+    Hw(j+N/2+1) = 1/(1-coef1*compl+coef2*compl*compl);
+end
+
+x = zeros(N,1);
+x(N/2) = 1;
+y = zeros(N,1);
+% To calculate the impulse response of the filter, we use the difference
+% equation of the filter and put an impulse x[n] as the input, So we get
+% output y[n] which is the impulse response
+for n=1:N
+    if(n==1)
+        y(n) = x(n);
+    elseif(n==2)
+        y(n) = coef1*y(n-1) + x(n);
+    else
+        y(n) = x(n) + coef1*y(n-1) - coef2*y(n-2);
+    end
+end
+
+h = y;
+figure(1);
+subplot(2,1,1);
+plot(h);
+title('Impulse Response of 2-pole resonator');
+xlabel('n+128');
+subplot(2,1,2);
+plot(20*log10(abs(Hw)));
+title('Magnitude Response of 2-pole resonator | log scale');
+ylabel('20log(|H(w)|)');
+xlabel('frequency');
+
+%2
+% Generating the impulse train
+F0 = 150;
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+
+% Evaluating the output using the same method of difference equations
+y = zeros(8000,1);
+for n=1:8000
+    if(n==1)
+        y(n) = imptrain(n);
+    elseif(n==2)
+        y(n) = coef1*y(n-1) + imptrain(n);
+    else
+        y(n) = imptrain(n) + coef1*y(n-1) - coef2*y(n-2);
+    end
+end
+
+figure(2);
+plot(y(1:2048));
+xlabel('n');
+title('Filter response to impulse train');
+
+% sound(y, 16000);
+
+%3
+% All possible combinations of the given parameters of F1, B1 and F0 lead
+% to the signals y1, y2, y3, y4
+y1 = resonator2poleimpout(300, 100, 120);
+y2 = resonator2poleimpout(1200, 200, 120);
+y3 = resonator2poleimpout(300, 100, 180);
+y4 = resonator2poleimpout(1200, 200, 180);
+
+figure(3);
+subplot(2,2,1);
+plot(y1(1:2048));
+title('F1=300, B1=100, F0=120');
+xlabel('n');
+subplot(2,2,2);
+plot(y2(1:2048));
+title('F1=1200, B1=200, F0=120');
+xlabel('n');
+subplot(2,2,3);
+plot(y3(1:2048));
+title('F1=300, B1=100, F0=180');
+xlabel('n');
+subplot(2,2,4);
+plot(y4(1:2048));
+title('F1=1200, B1=200, F0=180');
+xlabel('n');
+
+% sound(y1, 16000);
+% sound(y2, 16000);
+% sound(y3, 16000);
+% sound(y4, 16000);
+
+%4
+%\a\
+% Synthesizing the sounds of vowels
+[ya120 ha120] = resonator6poleout(730, 1090, 2440, 100, 120);
+[ya220 ha220] = resonator6poleout(730, 1090, 2440, 100, 220);
+% sound(ya120, 16000);
+% sound(ya220, 16000);
+figure(4);
+subplot(3,1,1);
+plot(abs(fft(ha120)));
+title('magnitude response of the \a\ digital filter')
+subplot(3,1,2);
+plot(ya120(1:2048));
+title('output of 120 Hz impulse train passed through \a\ filter')
+subplot(3,1,3);
+plot(ya220(1:2048));
+title('output of 220 Hz impulse train passed through \a\ filter')
+
+%\i\
+[yi120 hi120] = resonator6poleout(270, 2290, 3010, 100, 120);
+[yi220 hi220] = resonator6poleout(270, 2290, 3010, 100, 220);
+% sound(yi120, 16000);
+% sound(yi220, 16000);
+figure(5);
+subplot(3,1,1);
+plot(abs(fft(hi120)));
+title('magnitude response of the \i\ digital filter')
+subplot(3,1,2);
+plot(yi120(1:2048));
+title('output of 120 Hz impulse train passed through \i\ filter')
+subplot(3,1,3);
+plot(yi220(1:2048));
+title('output of 220 Hz impulse train passed through \i\ filter')
+
+%\u\
+[yu120 hu120] = resonator6poleout(300, 870, 2440, 100, 120);
+[yu220 hu220] = resonator6poleout(300, 870, 2440, 100, 220);
+% sound(yu120, 16000);
+% sound(yu220, 16000);
+figure(6);
+subplot(3,1,1);
+plot(abs(fft(hu120)));
+title('magnitude response of the \u\ digital filter')
+subplot(3,1,2);
+plot(yu120(1:2048));
+title('output of 120 Hz impulse train passed through \u\ filter')
+subplot(3,1,3);
+plot(yu220(1:2048));
+title('output of 220 Hz impulse train passed through \u\ filter')
+
+%5
+% We will analyze two signals ya120 and yi220
+%Twin = 10ms
+Tw = 0.01;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+% ya120
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(7);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title('Magnitude response of the signal1 without windowing | Twin=10ms')
+subplot(3,1,2);
+plot(Ya1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Ya2);
+title('Magnitude response of the hamming windowed signal')
+
+%yi220
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(8);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title('Magnitude response of the signal2 without windowing | Twin=10ms')
+subplot(3,1,2);
+plot(Yi1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Yi2);
+title('Magnitude response of the hamming windowed signal')
+
+
+%Twin = 40ms
+Tw = 0.04;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+% ya120
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(9);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title('Magnitude response of the signal1 without windowing | Twin=40ms')
+subplot(3,1,2);
+plot(Ya1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Ya2);
+title('Magnitude response of the hamming windowed signal')
+
+%yi220
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(10);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title('Magnitude response of the signal2 without windowing | Twin=40ms')
+subplot(3,1,2);
+plot(Yi1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Yi2);
+title('Magnitude response of the hamming windowed signal')
+
+%Twin = 100ms
+Tw = 0.1;
+Lw = Tw*16000;
+wrect = rectwin(Lw);
+whamm = hamming(Lw);
+
+
+% ya120
+ya1 = zeros(8000,1);
+ya1(1:1:Lw) = ya120(4001:1:4000+Lw).*wrect(1:1:Lw);
+Ya1 = abs(fft(ya1));
+ya2 = zeros(8000,1);
+ya2(1:1:Lw) = ya120(4001:1:4000+Lw).*whamm(1:1:Lw);
+Ya2 = abs(fft(ya2));
+
+figure(11);
+subplot(3,1,1);
+plot(abs(fft(ya120)));
+title('Magnitude response of the signal1 without windowing | Twin=100ms')
+subplot(3,1,2);
+plot(Ya1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Ya2);
+title('Magnitude response of the hamming windowed signal')
+
+%yi220
+yi1 = zeros(8000,1);
+yi1(1:1:Lw) = yi220(4001:1:4000+Lw).*wrect(1:1:Lw);
+Yi1 = abs(fft(yi1));
+yi2 = zeros(8000,1);
+yi2(1:1:Lw) = yi220(4001:1:4000+Lw).*whamm(1:1:Lw);
+Yi2 = abs(fft(yi2));
+
+figure(12);
+subplot(3,1,1);
+plot(abs(fft(yi120)));
+title('Magnitude response of the signal2 without windowing | Twin=100ms')
+subplot(3,1,2);
+plot(Yi1);
+title('Magnitude response of the rectangular windowed signal')
+subplot(3,1,3);
+plot(Yi2);
+title('Magnitude response of the hamming windowed signal')
+
+##### SOURCE END #####
+--></body></html>
