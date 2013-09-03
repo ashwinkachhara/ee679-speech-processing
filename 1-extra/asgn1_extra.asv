@@ -1,4 +1,4 @@
-% EE679 Speech Processing Assignment 1-extra
+% Assignment 1-extra
 % Ashwin Kachhara, 10d070048
 
 % Synthesizing the sounds of each frequency in the song. Each of these
@@ -13,8 +13,7 @@ y5 = resonator6poleout(730, 1090, 2440, 100, 277);%5
 y6 = resonator6poleout(730, 1090, 2440, 100, 294);%6
 y7 = resonator6poleout(730, 1090, 2440, 100, 330);%7
 
-% Arranging accoring to time and sequence of notes as described in the doc
-% file. We get the final signal y which contains the entire song.
+% 
 y = [
 y1(1:(0.2*16000));
 y2(1:(0.2*16000));
@@ -55,12 +54,7 @@ y5(1:(0.3*16000));
 y4(1:(0.3*16000));
 y3(1:(0.4*16000));
 y3(1:(0.2*16000));
-];
+]
 
-% Normalizing the signal before exporting the audio i.e. finding the
-% absolute maximum and dividing the entire sequence by it to avoid
-% clipping.
 maxvalue = max(abs(y));
 y=y/abs(maxvalue);
-
-wavwrite(y, 16000, 'song.wav');
