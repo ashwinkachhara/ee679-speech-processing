@@ -1,0 +1,180 @@
+% for p=10 model of sound 'a'
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+sigma = 0.407359140844486;
+F0 = 125;
+Fs = 8000;
+
+% Generating the impulse train
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+imptrain = imptrain*sigma;
+
+S = zeros(8000,1);
+for i=11:8000,
+    S(i) = imptrain(i)- S(i-1:-1:i-10)'*a(2:end)';
+end
+
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+for i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+end
+
+Ssyn_a = Sd(11:2410);
+c_a = realcepstrum(Ssyn_a,2048);
+figure(1)
+plot(abs(c_a))
+
+% for p=10 model of sound 'i'
+a = [1,0.698317342461645,-0.909861237184334,-1.65274560720659,-0.235382082563609,0.952174308040117,0.937834384933943,-0.135865286890716,-0.412030429797570,-0.0311303168409126,0.188984000693420;];
+sigma = sqrt(0.025784896943841);
+F0 = 133.33;
+Fs = 8000;
+
+% Generating the impulse train
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+imptrain = imptrain*sigma;
+
+S = zeros(8000,1);
+
+for i=11:8000,
+    S(i) = imptrain(i)- S(i-1:-1:i-10)'*a(2:end)';
+end
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+for i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+end
+
+Ssyn_i = Sd(11:2410);
+c_i = realcepstrum(Ssyn_i,2048);
+figure(2)
+plot(abs(c_i))
+
+% for p=10 model of sound 'n'
+a = [1,-0.336683172630504,-0.0955401231582934,-1.24594147043500,0.468450686416111,0.0442257434383397,0.618911147611879,-0.269140314973162,0.108207838982661,-0.197305482909665,0.166620298830989;];
+sigma = sqrt(0.004622502872126);
+F0 = 129.03;
+Fs = 8000;
+
+% Generating the impulse train
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+imptrain = imptrain*sigma;
+
+S = zeros(8000,1);
+
+for i=11:8000,
+    S(i) = imptrain(i)- S(i-1:-1:i-10)'*a(2:end)';
+end
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+for i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+end
+
+Ssyn_n = Sd(11:2410);
+c_n = realcepstrum(Ssyn_n,2048);
+figure(3)
+plot(abs(c_n))
+
+% for p=10 model of sound 's'
+a = [1,1.63614982448397,0.882745291534022,-0.174884140926944,-0.253039240829985,-0.370752035574149,-0.381388031674158,-0.255543293068461,0.00507731220266254,0.124808255685261,0.134048946480061;];
+sigma = sqrt(0.011294540783375);
+Fs = 8000;
+
+% Generating the white noise signal
+wgnoise = wgn(8000,1,sigma.^2);
+
+S = zeros(8000,1);
+
+for i=11:8000,
+    S(i) = wgnoise(i)- S(i-1:-1:i-10)'*a(2:end)';
+end
+
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+for i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+end
+
+Ssyn_s = Sd(11:2410);
+c_s = realcepstrum(Ssyn_s,2048);
+figure(4)
+plot(abs(c_s))
+
+filter = zeros(N,1);
+% We will take 5ms spectrum for getting the vocal tract freq response
+% 5ms = 40 samples
+
+filter(1:40) = 1;
+
+c_a_filt = real(fft(c_a.*filter));
+c_i_filt = real(fft(c_i).*filter));
+c_n_filt = real(fft(c_n(1:N).*filter));
+c_s_filt = real(fft(c_s(1:N).*filter));
+p = 10;
+
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+e = sqrt(0.165941469629558);
+Pspec_a = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    Pspec_a(k+1) = e/(abs(expo*a')).^2;
+end
+Pspec_a = sqrt(Pspec_a);
+figure(5)
+plot((1:1:N),[10*c_a_filt, 10*log10(Pspec_a)])
+
+a = [1,0.698317342461645,-0.909861237184334,-1.65274560720659,-0.235382082563609,0.952174308040117,0.937834384933943,-0.135865286890716,-0.412030429797570,-0.0311303168409126,0.188984000693420;];
+e = sqrt(0.025784896943841);
+Pspec_i = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    Pspec_i(k+1) = e/(abs(expo*a')).^2;
+end
+Pspec_i = sqrt(Pspec_i);
+figure(6)
+plot((1:1:N),[10*c_i_filt, 10*log10(Pspec_i)])
+
+a = [1,-0.336683172630503,-0.0955401231582948,-1.24594147043500,0.468450686416110,0.0442257434383423,0.618911147611882,-0.269140314973162,0.108207838982659,-0.197305482909666,0.166620298830989;];
+e = sqrt(0.004622502872126);
+Pspec_n = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    Pspec_n(k+1) = e/(abs(expo*a')).^2;
+end
+Pspec_n = sqrt(Pspec_n);
+figure(7)
+plot((1:1:N),[10*c_n_filt, 10*log10(Pspec_n)])
+
+a = [1,1.63614982448397,0.882745291534022,-0.174884140926944,-0.253039240829985,-0.370752035574149,-0.381388031674158,-0.255543293068461,0.00507731220266254,0.124808255685261,0.134048946480061;];
+e = sqrt(0.011294540783375);
+Pspec_s = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    Pspec_s(k+1) = e/(abs(expo*a')).^2;
+end
+Pspec_s = sqrt(Pspec_s);
+figure(8)
+plot((1:1:N),[10*c_s_filt, 10*log10(Pspec_s)])
+
+
+
+
+
+
+
+
+

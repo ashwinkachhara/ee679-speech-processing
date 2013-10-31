@@ -1,0 +1,5 @@
+function c = cepstrum(s,N)
+    Sw = abs(fft(s));
+    k = 1:1:N;
+    log(Sw)*exp(2*pi*(k-1)*n/N)
+end

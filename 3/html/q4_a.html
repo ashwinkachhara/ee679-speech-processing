@@ -1,0 +1,132 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>q4_a</title><meta name="generator" content="MATLAB 7.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-10-03"><meta name="DC.source" content="q4_a.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% for p=10 model of sound 'a'</span>
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+sigma = 0.407359140844486;
+F0 = 125;
+Fs = 8000;
+
+<span class="comment">% Generating the impulse train</span>
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+imptrain = imptrain*sigma;
+
+S = zeros(8000,1);
+<span class="keyword">for</span> i=11:8000,
+    S(i) = imptrain(i)- S(i-1:-1:i-10)'*a(2:end)';
+<span class="keyword">end</span>
+
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+<span class="keyword">for</span> i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+<span class="keyword">end</span>
+
+Ssyn = Sd(11:2410);
+figure(1)
+plot(Ssyn(500:740))
+title(<span class="string">'Synthesized waveform \a\'</span>)
+xlabel(<span class="string">'t'</span>)
+</pre><pre class="codeoutput">Warning: Unable to interpret TeX string "Synthesized waveform \a\" 
+</pre><img vspace="5" hspace="5" src="q4_a_01.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.12<br></p></div><!--
+##### SOURCE BEGIN #####
+% for p=10 model of sound 'a'
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+sigma = 0.407359140844486;
+F0 = 125;
+Fs = 8000;
+
+% Generating the impulse train
+T0 = round(1/F0);
+t = 0:1/Fs:1;
+imptrain = zeros(size(t));
+imptrain(1:Fs/F0:end) = 1;
+imptrain = imptrain*sigma;
+
+S = zeros(8000,1);
+for i=11:8000,
+    S(i) = imptrain(i)- S(i-1:-1:i-10)'*a(2:end)';
+end
+
+Sd = zeros(8000,1);
+Sd(1) = S(i);
+for i=11:8000,
+    Sd(i) = 0.975*Sd(i-1) + S(i);
+end
+
+Ssyn = Sd(11:2410);
+figure(1)
+plot(Ssyn(500:740))
+title('Synthesized waveform \a\')
+xlabel('t')
+
+
+
+
+##### SOURCE END #####
+--></body></html>
