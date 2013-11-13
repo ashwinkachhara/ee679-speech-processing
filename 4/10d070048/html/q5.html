@@ -1,0 +1,196 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>q5</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-01"><meta name="DC.source" content="q5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% We repeat the entire procedure for \s\ signal sampled at 16kHz</span>
+
+Sa = wavread(<span class="string">'s16.wav'</span>);
+Ls = length(Sa);
+Sa(1:1:Ls/2) = Sa(1:2:Ls);
+S = zeros(Ls,1);
+<span class="comment">%30ms window, sampling rate of 16k</span>
+Lw = 0.03 * 16000;
+w = hamming(Lw);
+<span class="comment">% Pre-emphasis with a = 0.975</span>
+S(1) = Sa(1);
+S(2:end) = Sa(2:end) - 0.975*Sa(1:end-1);
+pre_em_Spec_s = abs(fft(S(1:Lw).*w, 1024));
+
+N = 1024;
+c_s = realcepstrum(Sa,2048);
+figure(1)
+plot(abs(c_s))
+title(<span class="string">'Speech Cepstrum \s\ sampled at 16kHz'</span>)
+xlabel(<span class="string">'Quefrency(n)'</span>)
+ylabel(<span class="string">'magnitude'</span>)
+filter = zeros(N,1);
+
+<span class="comment">% LP filtering the cepstrum for 13, 26, 40 cepstral coefficients</span>
+<span class="comment">% respectively.</span>
+
+filter(1:13) = 1;
+c_s_filt13 = real(fft(c_s(1:N).*filter));
+
+filter(1:26) = 1;
+c_s_filt26 = real(fft(c_s(1:N).*filter));
+
+filter(1:40) = 1;
+c_s_filt40 = real(fft(c_s(1:N).*filter));
+
+Sw = zeros(Lw,1);
+strt = floor(Ls/2-Lw/2);
+Sw(1:end) = S(strt:strt+Lw-1).*w;
+spect_a = mag2db(abs(fft(Sw, 1024)));
+
+p = 20;
+r=zeros(p+1, 1);
+<span class="keyword">for</span> i=0:p,
+    r(i+1) = Sw(1:Lw-i)'*Sw(i+1:Lw);
+<span class="keyword">end</span>
+
+[a18 e18] = levinson(r, 18);
+a = a18;
+e = e18;
+LPPspec_s = zeros(N,1);
+<span class="keyword">for</span> k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:18)*1i*w1);
+    LPPspec_s(k+1) = e/(abs(expo*a')).^2;
+<span class="keyword">end</span>
+LPPspec_s = sqrt(LPPspec_s);
+figure(2)
+plot((1:1:N/2),[20*c_s_filt13(N/2+1:N)-20, 20*c_s_filt26(N/2+1:N)-20, 20*c_s_filt40(N/2+1:N)-20, 20*log(LPPspec_s(N/2+1:N)), 20*log(pre_em_Spec_s(N/2+1:N))])
+legend({<span class="string">'Spectral envelope(13 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(26 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(40 cepstral coeffs)'</span>, <span class="string">'LPC Spectrum'</span>, <span class="string">'Actual pre-emphasized spectrum'</span>}, <span class="string">'Location'</span>, <span class="string">'SouthEast'</span>)
+title(<span class="string">'Spectrum \s\'</span>)
+xlabel(<span class="string">'Frequency(0 to 4000Hz)'</span>)
+ylabel(<span class="string">'Magnitude in dB'</span>)
+</pre><pre class="codeoutput">Warning: Unable to interpret TeX string "Speech Cepstrum \s\ sampled at 16kHz" 
+</pre><img vspace="5" hspace="5" src="q5_01.png" alt=""> <img vspace="5" hspace="5" src="q5_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% We repeat the entire procedure for \s\ signal sampled at 16kHz
+
+Sa = wavread('s16.wav');
+Ls = length(Sa);
+Sa(1:1:Ls/2) = Sa(1:2:Ls);
+S = zeros(Ls,1);
+%30ms window, sampling rate of 16k
+Lw = 0.03 * 16000;
+w = hamming(Lw);
+% Pre-emphasis with a = 0.975
+S(1) = Sa(1);
+S(2:end) = Sa(2:end) - 0.975*Sa(1:end-1);
+pre_em_Spec_s = abs(fft(S(1:Lw).*w, 1024));
+
+N = 1024;
+c_s = realcepstrum(Sa,2048);
+figure(1)
+plot(abs(c_s))
+title('Speech Cepstrum \s\ sampled at 16kHz')
+xlabel('Quefrency(n)')
+ylabel('magnitude')
+filter = zeros(N,1);
+
+% LP filtering the cepstrum for 13, 26, 40 cepstral coefficients
+% respectively.
+
+filter(1:13) = 1;
+c_s_filt13 = real(fft(c_s(1:N).*filter));
+
+filter(1:26) = 1;
+c_s_filt26 = real(fft(c_s(1:N).*filter));
+
+filter(1:40) = 1;
+c_s_filt40 = real(fft(c_s(1:N).*filter));
+
+Sw = zeros(Lw,1);
+strt = floor(Ls/2-Lw/2);
+Sw(1:end) = S(strt:strt+Lw-1).*w;
+spect_a = mag2db(abs(fft(Sw, 1024)));
+
+p = 20;
+r=zeros(p+1, 1);
+for i=0:p,
+    r(i+1) = Sw(1:Lw-i)'*Sw(i+1:Lw);
+end
+
+[a18 e18] = levinson(r, 18);
+a = a18;
+e = e18;
+LPPspec_s = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:18)*1i*w1);
+    LPPspec_s(k+1) = e/(abs(expo*a')).^2;
+end
+LPPspec_s = sqrt(LPPspec_s);
+figure(2)
+plot((1:1:N/2),[20*c_s_filt13(N/2+1:N)-20, 20*c_s_filt26(N/2+1:N)-20, 20*c_s_filt40(N/2+1:N)-20, 20*log(LPPspec_s(N/2+1:N)), 20*log(pre_em_Spec_s(N/2+1:N))])
+legend({'Spectral envelope(13 cepstral coeffs)', 'Spectral envelope(26 cepstral coeffs)', 'Spectral envelope(40 cepstral coeffs)', 'LPC Spectrum', 'Actual pre-emphasized spectrum'}, 'Location', 'SouthEast')
+title('Spectrum \s\')
+xlabel('Frequency(0 to 4000Hz)')
+ylabel('Magnitude in dB')
+##### SOURCE END #####
+--></body></html>

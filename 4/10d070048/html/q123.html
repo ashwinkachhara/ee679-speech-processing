@@ -1,0 +1,372 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>q123</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-10-31"><meta name="DC.source" content="q123.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput">S_a = wavread(<span class="string">'a.wav'</span>);
+S_i = wavread(<span class="string">'i.wav'</span>);
+S_n = wavread(<span class="string">'n.wav'</span>);
+S_s = wavread(<span class="string">'s.wav'</span>);
+
+<span class="comment">% plot vocal tract and excitation component of the cepstrum</span>
+<span class="comment">% try diff cutoff of filter. 13, 26, 40</span>
+
+Lwin = 240;
+w = hamming(Lwin);
+<span class="comment">%</span>
+pre_em_S_a = zeros(length(S_a),1);
+pre_em_S_a(1) = S_a(1);
+pre_em_S_a(2:end) = S_a(2:end) - 0.975*S_a(1:end-1);
+pre_em_Spec_a = abs(fft(pre_em_S_a(1:Lwin).*w, 1024));
+
+pre_em_S_i = zeros(length(S_i),1);
+pre_em_S_i(1) = S_i(1);
+pre_em_S_i(2:end) = S_i(2:end) - 0.975*S_i(1:end-1);
+pre_em_Spec_i = abs(fft(pre_em_S_i(1:Lwin).*w, 1024));
+
+pre_em_S_n = zeros(length(S_n),1);
+pre_em_S_n(1) = S_n(1);
+pre_em_S_n(2:end) = S_n(2:end) - 0.975*S_n(1:end-1);
+pre_em_Spec_n = abs(fft(pre_em_S_n(1:Lwin).*w, 1024));
+
+pre_em_S_s = zeros(length(S_s),1);
+pre_em_S_s(1) = S_s(1);
+pre_em_S_s(2:end) = S_s(2:end) - 0.975*S_s(1:end-1);
+pre_em_Spec_s = abs(fft(pre_em_S_s(1:Lwin).*w, 1024));
+
+N = 1024;
+c_a = realcepstrum(pre_em_S_a,N);
+c_i = realcepstrum(pre_em_S_i,N);
+c_n = realcepstrum(pre_em_S_n,N);
+c_s = realcepstrum(pre_em_S_s,N);
+
+figure(1)
+plot(abs(c_a))
+title(<span class="string">'Speech Cepstrum \a\'</span>)
+xlabel(<span class="string">'Quefrency(n)'</span>)
+ylabel(<span class="string">'magnitude'</span>)
+
+figure(2)
+plot(abs(c_i))
+title(<span class="string">'Speech Cepstrum \i\'</span>)
+xlabel(<span class="string">'Quefrency(n)'</span>)
+ylabel(<span class="string">'magnitude'</span>)
+
+figure(3)
+plot(abs(c_n))
+title(<span class="string">'Speech Cepstrum \n\'</span>)
+xlabel(<span class="string">'Quefrency(n)'</span>)
+ylabel(<span class="string">'magnitude'</span>)
+
+figure(4)
+plot(abs(c_s))
+title(<span class="string">'Speech Cepstrum \s\'</span>)
+xlabel(<span class="string">'Quefrency(n)'</span>)
+ylabel(<span class="string">'magnitude'</span>)
+
+filter = zeros(N,1);
+<span class="comment">% We will take 5ms spectrum for getting the vocal tract freq response</span>
+<span class="comment">% 5ms = 40 samples</span>
+
+filter(1:13) = 1;
+c_a_filt13 = real(fft(c_a.*filter));
+c_i_filt13 = real(fft(c_i.*filter));
+c_n_filt13 = real(fft(c_n.*filter));
+c_s_filt13 = real(fft(c_s.*filter));
+
+filter(1:26) = 1;
+c_a_filt26 = real(fft(c_a.*filter));
+c_i_filt26 = real(fft(c_i.*filter));
+c_n_filt26 = real(fft(c_n.*filter));
+c_s_filt26 = real(fft(c_s.*filter));
+
+filter(1:40) = 1;
+c_a_filt40 = real(fft(c_a.*filter));
+c_i_filt40 = real(fft(c_i.*filter));
+c_n_filt40 = real(fft(c_n.*filter));
+c_s_filt40 = real(fft(c_s.*filter));
+p = 10;
+
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+e = sqrt(0.165941469629558);
+LPPspec_a = zeros(N,1);
+<span class="keyword">for</span> k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_a(k+1) = e/(abs(expo*a')).^2;
+<span class="keyword">end</span>
+LPPspec_a = sqrt(LPPspec_a);
+figure(5)
+plot((1:1:N/2),[20*c_a_filt13(N/2+1:N)-20, 20*c_a_filt26(N/2+1:N)-20, 20*c_a_filt40(N/2+1:N)-20, 20*log(LPPspec_a(N/2+1:N)), 20*log(pre_em_Spec_a(N/2+1:N))])
+legend({<span class="string">'Spectral envelope(13 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(26 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(40 cepstral coeffs)'</span>, <span class="string">'LPC Spectrum'</span>, <span class="string">'Actual pre-emphasized spectrum'</span>}, <span class="string">'Location'</span>, <span class="string">'SouthEast'</span>)
+title(<span class="string">'Spectrum \a\'</span>)
+xlabel(<span class="string">'Frequency(0 to 4000Hz)'</span>)
+ylabel(<span class="string">'Magnitude in dB'</span>)
+
+a = [1,0.698317342461645,-0.909861237184334,-1.65274560720659,-0.235382082563609,0.952174308040117,0.937834384933943,-0.135865286890716,-0.412030429797570,-0.0311303168409126,0.188984000693420;];
+e = sqrt(0.025784896943841);
+LPPspec_i = zeros(N,1);
+<span class="keyword">for</span> k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_i(k+1) = e/(abs(expo*a')).^2;
+<span class="keyword">end</span>
+LPPspec_i = sqrt(LPPspec_i);
+figure(6)
+plot((1:1:N/2),[20*c_i_filt13(N/2+1:N)-20, 20*c_i_filt26(N/2+1:N)-20, 20*c_i_filt40(N/2+1:N)-20, 20*log(LPPspec_i(N/2+1:N)), 20*log(pre_em_Spec_i(N/2+1:N))])
+legend({<span class="string">'Spectral envelope(13 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(26 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(40 cepstral coeffs)'</span>, <span class="string">'LPC Spectrum'</span>, <span class="string">'Actual pre-emphasized spectrum'</span>}, <span class="string">'Location'</span>, <span class="string">'SouthEast'</span>)
+title(<span class="string">'Spectrum \i\'</span>)
+xlabel(<span class="string">'Frequency(0 to 4000Hz)'</span>)
+ylabel(<span class="string">'Magnitude in dB'</span>)
+
+a = [1,-0.336683172630503,-0.0955401231582948,-1.24594147043500,0.468450686416110,0.0442257434383423,0.618911147611882,-0.269140314973162,0.108207838982659,-0.197305482909666,0.166620298830989;];
+e = sqrt(0.004622502872126);
+LPPspec_n = zeros(N,1);
+<span class="keyword">for</span> k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_n(k+1) = e/(abs(expo*a')).^2;
+<span class="keyword">end</span>
+LPPspec_n = sqrt(LPPspec_n);
+figure(7)
+plot((1:1:N/2),[20*c_n_filt13(N/2+1:N)-20, 20*c_n_filt26(N/2+1:N)-20, 20*c_n_filt40(N/2+1:N)-20, 20*log(LPPspec_n(N/2+1:N)), 20*log(pre_em_Spec_n(N/2+1:N))])
+legend({<span class="string">'Spectral envelope(13 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(26 cepstral coeffs'</span>, <span class="string">'Spectral envelope(40 cepstral coeffs)'</span>, <span class="string">'LPC Spectrum'</span>, <span class="string">'Actual pre-emphasized spectrum'</span>}, <span class="string">'Location'</span>, <span class="string">'SouthEast'</span>)
+title(<span class="string">'Spectrum \n\'</span>)
+xlabel(<span class="string">'Frequency(0 to 4000Hz)'</span>)
+ylabel(<span class="string">'Magnitude in dB'</span>)
+
+a = [1,1.63614982448397,0.882745291534022,-0.174884140926944,-0.253039240829985,-0.370752035574149,-0.381388031674158,-0.255543293068461,0.00507731220266254,0.124808255685261,0.134048946480061;];
+e = sqrt(0.011294540783375);
+LPPspec_s = zeros(N,1);
+<span class="keyword">for</span> k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_s(k+1) = e/(abs(expo*a')).^2;
+<span class="keyword">end</span>
+LPPspec_s = sqrt(LPPspec_s);
+figure(8)
+plot((1:1:N/2),[20*c_s_filt13(N/2+1:N)-20, 20*c_s_filt26(N/2+1:N)-20, 20*c_s_filt40(N/2+1:N)-20, 20*log(LPPspec_s(N/2+1:N)), 20*log(pre_em_Spec_s(N/2+1:N))])
+legend({<span class="string">'Spectral envelope(13 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(26 cepstral coeffs)'</span>, <span class="string">'Spectral envelope(40 cepstral coeffs)'</span>, <span class="string">'LPC Spectrum'</span>, <span class="string">'Actual pre-emphasized spectrum'</span>}, <span class="string">'Location'</span>, <span class="string">'SouthEast'</span>)
+title(<span class="string">'Spectrum \s\'</span>)
+xlabel(<span class="string">'Frequency(0 to 4000Hz)'</span>)
+ylabel(<span class="string">'Magnitude in dB'</span>)
+</pre><pre class="codeoutput">Warning: Unable to interpret TeX string "Speech Cepstrum \a\" 
+Warning: Unable to interpret TeX string "Speech Cepstrum \i\" 
+Warning: Unable to interpret TeX string "Speech Cepstrum \n\" 
+Warning: Unable to interpret TeX string "Speech Cepstrum \s\" 
+</pre><img vspace="5" hspace="5" src="q123_01.png" alt=""> <img vspace="5" hspace="5" src="q123_02.png" alt=""> <img vspace="5" hspace="5" src="q123_03.png" alt=""> <img vspace="5" hspace="5" src="q123_04.png" alt=""> <img vspace="5" hspace="5" src="q123_05.png" alt=""> <img vspace="5" hspace="5" src="q123_06.png" alt=""> <img vspace="5" hspace="5" src="q123_07.png" alt=""> <img vspace="5" hspace="5" src="q123_08.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+S_a = wavread('a.wav');
+S_i = wavread('i.wav');
+S_n = wavread('n.wav');
+S_s = wavread('s.wav');
+
+% plot vocal tract and excitation component of the cepstrum
+% try diff cutoff of filter. 13, 26, 40
+
+Lwin = 240;
+w = hamming(Lwin);
+% 
+pre_em_S_a = zeros(length(S_a),1);
+pre_em_S_a(1) = S_a(1);
+pre_em_S_a(2:end) = S_a(2:end) - 0.975*S_a(1:end-1);
+pre_em_Spec_a = abs(fft(pre_em_S_a(1:Lwin).*w, 1024));
+
+pre_em_S_i = zeros(length(S_i),1);
+pre_em_S_i(1) = S_i(1);
+pre_em_S_i(2:end) = S_i(2:end) - 0.975*S_i(1:end-1);
+pre_em_Spec_i = abs(fft(pre_em_S_i(1:Lwin).*w, 1024));
+
+pre_em_S_n = zeros(length(S_n),1);
+pre_em_S_n(1) = S_n(1);
+pre_em_S_n(2:end) = S_n(2:end) - 0.975*S_n(1:end-1);
+pre_em_Spec_n = abs(fft(pre_em_S_n(1:Lwin).*w, 1024));
+
+pre_em_S_s = zeros(length(S_s),1);
+pre_em_S_s(1) = S_s(1);
+pre_em_S_s(2:end) = S_s(2:end) - 0.975*S_s(1:end-1);
+pre_em_Spec_s = abs(fft(pre_em_S_s(1:Lwin).*w, 1024));
+
+N = 1024;
+c_a = realcepstrum(pre_em_S_a,N);
+c_i = realcepstrum(pre_em_S_i,N);
+c_n = realcepstrum(pre_em_S_n,N);
+c_s = realcepstrum(pre_em_S_s,N);
+
+figure(1)
+plot(abs(c_a))
+title('Speech Cepstrum \a\')
+xlabel('Quefrency(n)')
+ylabel('magnitude')
+
+figure(2)
+plot(abs(c_i))
+title('Speech Cepstrum \i\')
+xlabel('Quefrency(n)')
+ylabel('magnitude')
+
+figure(3)
+plot(abs(c_n))
+title('Speech Cepstrum \n\')
+xlabel('Quefrency(n)')
+ylabel('magnitude')
+
+figure(4)
+plot(abs(c_s))
+title('Speech Cepstrum \s\')
+xlabel('Quefrency(n)')
+ylabel('magnitude')
+
+filter = zeros(N,1);
+% We will take 5ms spectrum for getting the vocal tract freq response
+% 5ms = 40 samples
+
+filter(1:13) = 1;
+c_a_filt13 = real(fft(c_a.*filter));
+c_i_filt13 = real(fft(c_i.*filter));
+c_n_filt13 = real(fft(c_n.*filter));
+c_s_filt13 = real(fft(c_s.*filter));
+
+filter(1:26) = 1;
+c_a_filt26 = real(fft(c_a.*filter));
+c_i_filt26 = real(fft(c_i.*filter));
+c_n_filt26 = real(fft(c_n.*filter));
+c_s_filt26 = real(fft(c_s.*filter));
+
+filter(1:40) = 1;
+c_a_filt40 = real(fft(c_a.*filter));
+c_i_filt40 = real(fft(c_i.*filter));
+c_n_filt40 = real(fft(c_n.*filter));
+c_s_filt40 = real(fft(c_s.*filter));
+p = 10;
+
+a = [1,-0.420287293299905,-0.0167760932776719,-0.104562761984595,0.689852617695652,-0.361632554947867,0.140248097569097,-0.203610014001556,0.444672696487985,-0.120304813366367,-0.0794124187832130;];
+e = sqrt(0.165941469629558);
+LPPspec_a = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_a(k+1) = e/(abs(expo*a')).^2;
+end
+LPPspec_a = sqrt(LPPspec_a);
+figure(5)
+plot((1:1:N/2),[20*c_a_filt13(N/2+1:N)-20, 20*c_a_filt26(N/2+1:N)-20, 20*c_a_filt40(N/2+1:N)-20, 20*log(LPPspec_a(N/2+1:N)), 20*log(pre_em_Spec_a(N/2+1:N))])
+legend({'Spectral envelope(13 cepstral coeffs)', 'Spectral envelope(26 cepstral coeffs)', 'Spectral envelope(40 cepstral coeffs)', 'LPC Spectrum', 'Actual pre-emphasized spectrum'}, 'Location', 'SouthEast')
+title('Spectrum \a\')
+xlabel('Frequency(0 to 4000Hz)')
+ylabel('Magnitude in dB')
+
+a = [1,0.698317342461645,-0.909861237184334,-1.65274560720659,-0.235382082563609,0.952174308040117,0.937834384933943,-0.135865286890716,-0.412030429797570,-0.0311303168409126,0.188984000693420;];
+e = sqrt(0.025784896943841);
+LPPspec_i = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_i(k+1) = e/(abs(expo*a')).^2;
+end
+LPPspec_i = sqrt(LPPspec_i);
+figure(6)
+plot((1:1:N/2),[20*c_i_filt13(N/2+1:N)-20, 20*c_i_filt26(N/2+1:N)-20, 20*c_i_filt40(N/2+1:N)-20, 20*log(LPPspec_i(N/2+1:N)), 20*log(pre_em_Spec_i(N/2+1:N))])
+legend({'Spectral envelope(13 cepstral coeffs)', 'Spectral envelope(26 cepstral coeffs)', 'Spectral envelope(40 cepstral coeffs)', 'LPC Spectrum', 'Actual pre-emphasized spectrum'}, 'Location', 'SouthEast')
+title('Spectrum \i\')
+xlabel('Frequency(0 to 4000Hz)')
+ylabel('Magnitude in dB')
+
+a = [1,-0.336683172630503,-0.0955401231582948,-1.24594147043500,0.468450686416110,0.0442257434383423,0.618911147611882,-0.269140314973162,0.108207838982659,-0.197305482909666,0.166620298830989;];
+e = sqrt(0.004622502872126);
+LPPspec_n = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_n(k+1) = e/(abs(expo*a')).^2;
+end
+LPPspec_n = sqrt(LPPspec_n);
+figure(7)
+plot((1:1:N/2),[20*c_n_filt13(N/2+1:N)-20, 20*c_n_filt26(N/2+1:N)-20, 20*c_n_filt40(N/2+1:N)-20, 20*log(LPPspec_n(N/2+1:N)), 20*log(pre_em_Spec_n(N/2+1:N))])
+legend({'Spectral envelope(13 cepstral coeffs)', 'Spectral envelope(26 cepstral coeffs', 'Spectral envelope(40 cepstral coeffs)', 'LPC Spectrum', 'Actual pre-emphasized spectrum'}, 'Location', 'SouthEast')
+title('Spectrum \n\')
+xlabel('Frequency(0 to 4000Hz)')
+ylabel('Magnitude in dB')
+
+a = [1,1.63614982448397,0.882745291534022,-0.174884140926944,-0.253039240829985,-0.370752035574149,-0.381388031674158,-0.255543293068461,0.00507731220266254,0.124808255685261,0.134048946480061;];
+e = sqrt(0.011294540783375);
+LPPspec_s = zeros(N,1);
+for k=0:N-1,
+    w1 = k/1024 * 2 * pi;
+    expo = exp(-(0:p)*1i*w1);
+    LPPspec_s(k+1) = e/(abs(expo*a')).^2;
+end
+LPPspec_s = sqrt(LPPspec_s);
+figure(8)
+plot((1:1:N/2),[20*c_s_filt13(N/2+1:N)-20, 20*c_s_filt26(N/2+1:N)-20, 20*c_s_filt40(N/2+1:N)-20, 20*log(LPPspec_s(N/2+1:N)), 20*log(pre_em_Spec_s(N/2+1:N))])
+legend({'Spectral envelope(13 cepstral coeffs)', 'Spectral envelope(26 cepstral coeffs)', 'Spectral envelope(40 cepstral coeffs)', 'LPC Spectrum', 'Actual pre-emphasized spectrum'}, 'Location', 'SouthEast')
+title('Spectrum \s\')
+xlabel('Frequency(0 to 4000Hz)')
+ylabel('Magnitude in dB')
+
+
+
+##### SOURCE END #####
+--></body></html>
