@@ -1,128 +1,35 @@
-wordStr = 'eight';
+% Select which of the utterance you want to use to test the digit
+% recognition system
+wordStr = 'nine';
 wordIndex = 4;
 
+data = ['zero '; 'one  '; 'two  '; 'three'; 'four '; 'five '; 'six  '; 'seven'; 'eight'; 'nine ';];
+num = cellstr(data);
+
 S = audioread(strcat(pwd, '\',wordStr,'\',wordStr,num2str(wordIndex),'.wav'));
+% Extracting the cepstral coefficients
 frames = wincepstrum(S);
-
-load('centroidszero.mat');
-load('centroidsone.mat');
-
-centroids =  centroidszero;
 dist = zeros(10,1);
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(1) = dist(1) + mindist;
-end
 
-centroids =  centroidsone;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(2) = dist(2) + mindist;
-end
-
-centroids =  centroidstwo;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(3) = dist(3) + mindist;
-end
-
-centroids =  centroidsthree;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(4) = dist(4) + mindist;
-end
-
-centroids =  centroidsfour;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(5) = dist(5) + mindist;
-end
-
-centroids =  centroidsfive;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(6) = dist(6) + mindist;
-end
-
-centroids =  centroidssix;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(7) = dist(7) + mindist;
-end
-
-centroids =  centroidsseven;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(8) = dist(8) + mindist;
-end
-
-centroids =  centroidseight;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(9) = dist(9) + mindist;
-end
-
-centroids =  centroidsnine;
-distone = 0;
-for i=1:size(frames,2),
-    rep = repmat(frames(:,i),1,size(centroids,2));
-    dists = centroids - rep;
-    dists = dists.*dists;
-    dists = sum(dists,1);
-    [mindist, ind] = min(dists);
-    dist(10) = dist(10) + mindist;
+for wordInd=1:size(num,1),
+    load(strcat('centroids',num{wordInd},'.mat'));
+    for i=1:size(frames,2),
+        rep = repmat(frames(:,i),1,size(centroids,2));
+        dists = centroids - rep;
+        dists = dists.*dists;
+        dists = sum(dists,1);
+        [mindist, ind] = min(dists);
+        % Computing the distance to the nearest neighbor
+        dist(wordInd) = dist(wordInd) + mindist;
+        % In this case, we hypothesize that, the one codebook whose
+        % NN centroids give minimum average distance from the test data, is
+        % the correct answer
+    end
 end
 
 dist = dist/size(frames,2);
 
 [mindist, index] = min(dist);
-data = ['zero '; 'one  '; 'two  '; 'three'; 'four '; 'five '; 'six  '; 'seven'; 'eight'; 'nine ';];
-num = cellstr(data);
-
 num(index)
 
 
