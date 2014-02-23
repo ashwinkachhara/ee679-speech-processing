@@ -44,6 +44,6 @@ for wordIndex=1:size(num,1),
         % normalizing the centroids
         centroids(:,i) = centroids(:,i)/norm(centroids(:,i));
     end
-    % Save the codebook
+    % Save the codebooks
     save(strcat('centroids',wordStr), 'centroids');
 end
